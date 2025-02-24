@@ -33,11 +33,37 @@ use v5.40;
 
 our $VERSION = "0.01";
 
+use Daje::Workflow::Database;
 use Daje::Workflow::Loader;
+use Daje::Workflow;
 
 sub register ($self, $app, $config) {
 
+    my $test = 1;
+    push @{$app->routes->namespaces}, 'Daje::Controller';
 
+    my $migrations;
+    push @{$migrations}, {
+        class => 'Daje::Workflow::Database',
+        name => 'workflow', migration => 3
+    };
+
+    Daje::Workflow::Database->new(
+        pg          => $app->pg,
+        migrations  => $migrations,
+    )->migrate();
+
+    # my $loader = Daje::Workflow::Loader->new(
+    #     path => '/home/jan/Project/Daje-Workflow-Workflows/Workflows',
+    #     type => 'workflow',
+    # );
+    #
+    # my $workflow = Daje::Workflow->new(
+    #     pg            => $app->pg,
+    #     loader        => $loader->loader,
+    # );
+    #
+    # $app->helper(workflow => sub {$workflow});
 }
 
 
