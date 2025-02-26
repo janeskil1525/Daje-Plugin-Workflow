@@ -31,7 +31,7 @@ use v5.40;
 # janeskil1525 E<lt>janeskil1525@gmail.comE<gt>
 #
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 use Daje::Workflow::Database;
 use Daje::Workflow::Loader;
@@ -41,29 +41,40 @@ sub register ($self, $app, $config) {
 
     my $test = 1;
     push @{$app->routes->namespaces}, 'Daje::Controller';
-
-    my $migrations;
-    push @{$migrations}, {
-        class => 'Daje::Workflow::Database',
-        name => 'workflow', migration => 3
+    try {
+        Daje::Workflow::Database->new(
+            pg         => $app->pg,
+            migrations => $app->config('migrations'),
+        )->migrate();
+    } catch ($e) {
+        $app->log->error($e);
     };
 
-    Daje::Workflow::Database->new(
-        pg          => $app->pg,
-        migrations  => $migrations,
-    )->migrate();
+    my $loader;
+    try {
+        $loader = Daje::Workflow::Loader->new(
+            path => '/home/jan/Project/Daje-Workflow-Workflows/Workflows',
+            type => 'workflow',
+        );
+    } catch ($e) {
+        $app->log->error($e);
+    };
 
-    # my $loader = Daje::Workflow::Loader->new(
-    #     path => '/home/jan/Project/Daje-Workflow-Workflows/Workflows',
-    #     type => 'workflow',
-    # );
-    #
-    # my $workflow = Daje::Workflow->new(
-    #     pg            => $app->pg,
-    #     loader        => $loader->loader,
-    # );
-    #
-    # $app->helper(workflow => sub {$workflow});
+
+    my $workflow;
+    try {
+        $workflow = Daje::Workflow->new(
+            pg     => $app->pg,
+            loader => $loader->loader,
+        );
+    } catch ($e) {
+        $app->log->error($e);
+    };
+
+
+    $app->helper(workflow => sub {$workflow});
+
+    $app->log->debug("Daje::Plugin::Workflow registered");
 }
 
 
