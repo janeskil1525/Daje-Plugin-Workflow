@@ -31,7 +31,7 @@ use v5.40;
 # janeskil1525 E<lt>janeskil1525@gmail.comE<gt>
 #
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 use Daje::Workflow::Database;
 use Daje::Workflow::Loader;
@@ -51,11 +51,12 @@ sub register ($self, $app, $config) {
     };
 
     my $loader;
-    try {
+    try { # '/home/jan/Project/Daje-Workflow-Workflows/Workflows'
         $loader = Daje::Workflow::Loader->new(
-            path => '/home/jan/Project/Daje-Workflow-Workflows/Workflows',
-            type => 'workflow',
+            path => $app->config('workflow')->{loader}->{path},
+            type => $app->config('workflow')->{loader}->{type},
         );
+        $loader->load();
     } catch ($e) {
         $app->log->error($e);
     };
