@@ -72,7 +72,6 @@ sub register ($self, $app, $config) {
         $app->log->error($e);
     };
 
-
     $app->helper(workflow => sub {$workflow});
 
     $app->log->debug("Daje::Plugin::Workflow registered");
