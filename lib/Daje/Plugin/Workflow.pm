@@ -31,7 +31,7 @@ use v5.40;
 # janeskil1525 E<lt>janeskil1525@gmail.comE<gt>
 #
 
-our $VERSION = "0.03";
+our $VERSION = "0.04";
 
 use Daje::Workflow::Database;
 use Daje::Workflow::Loader;
@@ -39,17 +39,7 @@ use Daje::Workflow;
 
 sub register ($self, $app, $config) {
 
-    my $test = 1;
-    push @{$app->routes->namespaces}, 'Daje::Controller';
-    try {
-        Daje::Workflow::Database->new(
-            pg         => $app->pg,
-            migrations => $app->config('migrations'),
-        )->migrate();
-    } catch ($e) {
-        $app->log->error($e);
-    };
-
+    $app->log->debug("Daje::Plugin::Workflow::register starts");
     my $loader;
     try { # '/home/jan/Project/Daje-Workflow-Workflows/Workflows'
         $loader = Daje::Workflow::Loader->new(
