@@ -32,18 +32,26 @@ use v5.40;
 #
 #
 
+use Data::Dumper;
 use Mojo::JSON qw{decode_json};
 
 sub execute($self) {
 
     my $test = 1;
     # $self->render_later;
+    $self->app->log->debug('Daje::Controller::Workflow::execute');
+    my $temp = $self->req->body;
+    $self->app->log->debug("Body content" . Dumper($temp));
 
     my ($companies_pkey, $users_pkey) = $self->jwt->companies_users_pkey(
         $self->req->headers->header('X-Token-Check')
     );
 
+
+
     my $data->{data} = decode_json ($self->req->body);
+    $self->app->log->debug(Dumper($data));
+
     $data->{users_fkey} = $users_pkey;
     $data->{companies_fkey} = $companies_pkey;
     $data->{data}->{workflow}->{workflow_pkey} = 0 unless $data->{workflow}->{workflow_pkey};

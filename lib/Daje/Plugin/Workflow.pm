@@ -51,7 +51,6 @@ sub register ($self, $app, $config) {
         $app->log->error($e);
     };
 
-
     my $workflow;
     try {
         $workflow = Daje::Workflow->new(
@@ -63,6 +62,9 @@ sub register ($self, $app, $config) {
     };
 
     $app->helper(workflow => sub {$workflow});
+
+    my $r = $app->routes;
+    $r->put('/tools/api/v1/workflow/execute')->to('Workflow#execute');
 
     $app->log->debug("Daje::Plugin::Workflow registered");
 }
