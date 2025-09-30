@@ -53,7 +53,6 @@ sub execute($self) {
 
     $data->{context}->{users_fkey} = $users_pkey;
     $data->{context}->{companies_fkey} = $companies_pkey;
-     = 0 unless $data->{context}->{workflow}->{workflow_pkey};
     #
     # push @{$data->{actions}}, "$self->stash('wf_action')";
     # $data->{workflow}->{workflow} = $self->stash('workflow');
@@ -68,15 +67,15 @@ sub execute($self) {
         $self->workflow->context($data);
         $self->workflow->process($data->{context}->{workflow}->{activity});
         if($self->workflow->error->has_error() == 0) {
-            $self->render(json => {'result' => 'success'});
+            $self->render(json => {result => 1, data => 'OK'});
         } else {
             $self->render(json =>
-                {'result' => 'failed', data => $self->workflow->error->error()}
+                {result => 0, data => $self->workflow->error->error()}
             );
         }
     } catch ($e) {
-        $self->render(json => {'result' => 'failed', data => $e});
         $self->app->log->error('Daje::Controller::Workflow::execute ' . $e);
+        $self->render(json => {result => 0, data => $e});
     };
     $self->app->log->debug('Daje::Controller::Workflow::execute ends');
 }
