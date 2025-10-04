@@ -1,6 +1,6 @@
 Revision history for Perl extension Daje-Plugin-workflow
 
 {{$NEXT}}
-
+    - 2025-10-04 Improved logging and documentation
     - original version
 
