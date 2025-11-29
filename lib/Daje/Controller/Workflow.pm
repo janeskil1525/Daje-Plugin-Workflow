@@ -67,8 +67,8 @@ sub execute($self) {
     try {
         $self->app->log->debug('Daje::Controller::Workflow::execute ' . Dumper($data));
 
-        if ($data->{context}->{workflow}->{connector_data}->{workflow_pkey} == 0) {
-            say "Daje::Controller::Workflow " . Dumper($data->{context}->{workflow});
+        if ($data->{context}->{workflow}->{connector_data}->{workflow_pkey} == 0 and
+            $data->{context}->{workflow}->{connector_data}->{connector_pkey} > 0) {
             $data->{context}->{workflow}->{connector_data}->{workflow_pkey} =
                 Daje::Workflow::Database::Model->new(
                     db => $self->app->pg->db
