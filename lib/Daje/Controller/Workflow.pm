@@ -51,6 +51,7 @@ use Data::Dumper;
 use Mojo::JSON qw{decode_json};
 use Daje::Workflow::Database::Model;
 
+
 sub execute($self) {
 
     # $self->render_later;
@@ -65,11 +66,12 @@ sub execute($self) {
     my $data->{context} = decode_json ($self->req->body);
     try {
         $self->app->log->debug('Daje::Controller::Workflow::execute ' . Dumper($data));
-        say $data->{context}->{workflow}->{connector_data}->{workflow_pkey};
+
         if ($data->{context}->{workflow}->{connector_data}->{workflow_pkey} == 0) {
+            say "Daje::Controller::Workflow " . Dumper($data->{context}->{workflow});
             $data->{context}->{workflow}->{connector_data}->{workflow_pkey} =
                 Daje::Workflow::Database::Model->new(
-                    pg => $self->pg
+                    db => $self->app->pg->db
                 )->load_workflow_from_connector_fkey($data->{context}->{workflow});
         }
     } catch($e) {
