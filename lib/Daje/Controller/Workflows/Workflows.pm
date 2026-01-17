@@ -1,16 +1,16 @@
-package Daje::Controller::Workflow;
+package Daje::Controller::Workflows::Workflows;
 use Mojo::Base 'Mojolicious::Controller', -signatures;
 use v5.42;
 
 # NAME
 # ====
 #
-# Daje::Controller::Workflow - Mojolicious controller for Daje::Workflow
+# Daje::Controller::Workflow::Workflow - Mojolicious controller for Daje::Workflow
 #
 # SYNOPSIS
 # ========
 #
-#     use Daje::Controller::Workflow;
+#     use Daje::Controller::Workflow::Workflow;
 #
 #     Expected indata format
 #
@@ -30,7 +30,7 @@ use v5.42;
 # DESCRIPTION
 # ===========
 #
-# Daje::Controller::Workflow is the controller for accessing Daje::Workflow
+# Daje::Controller::Workflow::Workflow is the controller for accessing Daje::Workflow
 #
 # LICENSE
 # =======
@@ -55,17 +55,17 @@ use Daje::Workflow::Database::Model;
 sub execute($self) {
 
     # $self->render_later;
-    $self->app->log->debug('Daje::Controller::Workflow::execute');
+    $self->app->log->debug('Daje::Controller::Workflow::Workflow::execute');
     my $temp = $self->req->body;
     my ($companies_pkey, $users_pkey) = $self->jwt->companies_users_pkey(
         $self->req->headers->header('X-Token-Check')
     );
 
-    $self->app->log->debug('Daje::Controller::Workflow::execute '  . Dumper($self->req->body));
+    $self->app->log->debug('Daje::Controller::Workflows::Workflows::execute '  . Dumper($self->req->body));
 
     my $data->{context} = decode_json ($self->req->body);
     try {
-        $self->app->log->debug('Daje::Controller::Workflow::execute ' . Dumper($data));
+        $self->app->log->debug('Daje::Controller::Workflows::Workflows::execute ' . Dumper($data));
 
         if ($data->{context}->{workflow}->{connector_data}->{workflow_pkey} == 0 and
             $data->{context}->{workflow}->{connector_data}->{connector_pkey} > 0) {
@@ -75,7 +75,7 @@ sub execute($self) {
                 )->load_workflow_from_connector_fkey($data->{context}->{workflow});
         }
     } catch($e) {
-        $self->app->log->error('Daje::Controller::Workflow::execute ' . $e);
+        $self->app->log->error('Daje::Controller::Workflows::Workflows::execute ' . $e);
         $self->render(json => {result => 0, data => $e});
     };
 
@@ -90,26 +90,27 @@ sub execute($self) {
     #
     # say Dumper ($data);
     try {
-        $self->workflow->workflow_pkey($data->{context}->{workflow}->{connector_data}->{workflow_pkey});
-        $self->workflow->workflow_name($data->{context}->{workflow}->{workflow});
-        $self->workflow->context($data);
-        $self->workflow->process($data->{context}->{workflow}->{activity});
-        if($self->workflow->error->has_error() == 0) {
+        $self->workflow_engine->workflow_pkey($data->{context}->{workflow}->{connector_data}->{workflow_pkey});
+        $self->workflow_engine->workflow_name($data->{context}->{workflow}->{workflow});
+        $self->workflow_engine->context($data);
+        $self->workflow_engine->process($data->{context}->{workflow}->{activity});
+        if($self->workflow_engine->error->has_error() == 0) {
             $self->render(json => {result => 1, data => 'OK'});
         } else {
-            $self->app->log->error('Daje::Controller::Workflow::execute ' . $self->workflow->error->error());
+            $self->app->log->error('Daje::Controller::Workflows::Workflows::execute ' . $self->workflow_engine->error->error());
             $self->render(json =>
-                {result => 0, data => $self->workflow->error->error()}
+                {result => 0, data => $self->workflow_engine->error->error()}
             );
         }
     } catch ($e) {
-        $self->app->log->error('Daje::Controller::Workflow::execute ' . $e);
+        $self->app->log->error('Daje::Controller::Workflows::Workflows::execute ' . $e);
         $self->render(json => {result => 0, data => $e});
     };
-    $self->app->log->debug('Daje::Controller::Workflow::execute ends');
+    $self->app->log->debug('Daje::Controller::Workflows::Workflows::execute ends');
 }
 1;
 __END__
+
 
 
 
@@ -124,14 +125,14 @@ __END__
 =head1 NAME
 
 
-Daje::Controller::Workflow - Mojolicious controller for Daje::Workflow
+Daje::Controller::Workflow::Workflow - Mojolicious controller for Daje::Workflow
 
 
 
 =head1 SYNOPSIS
 
 
-    use Daje::Controller::Workflow;
+    use Daje::Controller::Workflow::Workflow;
 
     Expected indata format
 
@@ -143,6 +144,8 @@ Daje::Controller::Workflow - Mojolicious controller for Daje::Workflow
 
 
 =head1 REQUIRES
+
+L<Daje::Controller::Workflow> 
 
 L<Daje::Workflow::Database::Model> 
 

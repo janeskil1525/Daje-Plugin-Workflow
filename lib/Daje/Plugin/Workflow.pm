@@ -40,15 +40,33 @@ use v5.40;
 # janeskil1525 E<lt>janeskil1525@gmail.comE<gt>
 #
 
-our $VERSION = "0.15";
+our $VERSION = "0.25";
 
+use Data::Dumper;
 use Daje::Workflow::Database;
 use Daje::Workflow::Loader;
 use Daje::Workflow;
+use Daje::Database::Migrator;
 
 sub register ($self, $app, $config) {
 
     $app->log->debug("Daje::Plugin::Workflow::register starts");
+
+    my $migration->{class} = 'Daje::Workflow::Database';
+    $migration->{name} = 'workflow';
+    $migration->{migration} = 4;
+    my $migrations;
+    push @{$migrations}, $migration;
+    try {
+        Daje::Database::Migrator->new(
+            pg         => $app->pg,
+            migrations => $migrations,
+        )->migrate();
+    } catch ($e) {
+        $app->log->error($e);
+    };
+    push @{$app->routes->namespaces}, 'Daje::Controller::Workflows';
+
     my $loader;
     try { # '/home/jan/Project/Daje-Workflow-Workflows/Workflows'
         $loader = Daje::Workflow::Loader->new(
@@ -60,9 +78,9 @@ sub register ($self, $app, $config) {
         $app->log->error($e);
     };
 
-    my $workflow;
+    my $workflow_engine;
     try {
-        $workflow = Daje::Workflow->new(
+        $workflow_engine = Daje::Workflow->new(
             pg     => $app->pg,
             loader => $loader->loader,
         );
@@ -70,10 +88,10 @@ sub register ($self, $app, $config) {
         $app->log->error($e);
     };
 
-    $app->helper(workflow => sub {$workflow});
-
     my $r = $app->routes;
-    $r->put('/workflow/api/execute')->to('Workflow#execute');
+    $r->put('/workflow/api/execute')->to('Workflows#execute');
+
+    $app->helper(workflow_engine => sub {$workflow_engine});
 
     $app->log->debug("Daje::Plugin::Workflow registered");
 }
@@ -85,6 +103,7 @@ sub register ($self, $app, $config) {
 1;
 
 __END__
+
 
 
 
@@ -127,7 +146,7 @@ Daje::Plugin::Workflow is the Mojolicious plugin for Daje::Workflow
 
 =head1 REQUIRES
 
-L<Daje::Plugin::workflow> 
+L<Daje::Database::Migrator> 
 
 L<Daje::Workflow> 
 
