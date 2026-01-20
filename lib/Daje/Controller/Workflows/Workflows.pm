@@ -64,20 +64,6 @@ sub execute($self) {
     $self->app->log->debug('Daje::Controller::Workflows::Workflows::execute '  . Dumper($self->req->body));
 
     my $data->{context} = decode_json ($self->req->body);
-    try {
-        $self->app->log->debug('Daje::Controller::Workflows::Workflows::execute ' . Dumper($data));
-
-        if ($data->{context}->{workflow}->{connector_data}->{workflow_pkey} == 0 and
-            $data->{context}->{workflow}->{connector_data}->{connector_pkey} > 0) {
-            $data->{context}->{workflow}->{connector_data}->{workflow_pkey} =
-                Daje::Workflow::Database::Model->new(
-                    db => $self->app->pg->db
-                )->load_workflow_from_connector_fkey($data->{context}->{workflow});
-        }
-    } catch($e) {
-        $self->app->log->error('Daje::Controller::Workflows::Workflows::execute ' . $e);
-        $self->render(json => {result => 0, data => $e});
-    };
 
     $data->{context}->{users_fkey} = $users_pkey;
     $data->{context}->{companies_fkey} = $companies_pkey;
@@ -90,7 +76,11 @@ sub execute($self) {
     #
     # say Dumper ($data);
     try {
-        $self->workflow_engine->workflow_pkey($data->{context}->{workflow}->{connector_data}->{workflow_pkey});
+        if(exists $data->{context}->{payload}->{workflow_fkey}) {
+            $self->workflow_engine->workflow_pkey($data->{context}->{payload}->{workflow_fkey});
+        } else {
+            $self->workflow_engine->workflow_pkey($data->{context}->{workflow}->{workflow_fkey});
+        }
         $self->workflow_engine->workflow_name($data->{context}->{workflow}->{workflow});
         $self->workflow_engine->context($data);
         $self->workflow_engine->process($data->{context}->{workflow}->{activity});

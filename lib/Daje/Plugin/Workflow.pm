@@ -40,7 +40,7 @@ use v5.40;
 # janeskil1525 E<lt>janeskil1525@gmail.comE<gt>
 #
 
-our $VERSION = "0.25";
+our $VERSION = "0.30";
 
 use Data::Dumper;
 use Daje::Workflow::Database;
@@ -89,7 +89,8 @@ sub register ($self, $app, $config) {
     };
 
     my $r = $app->routes;
-    $r->put('/workflow/api/execute')->to('Workflows#execute');
+
+    $r->put('/' . $app->config('workflow')->{basepath} . '/api/workflow/execute')->to('Workflows#execute');
 
     $app->helper(workflow_engine => sub {$workflow_engine});
 
