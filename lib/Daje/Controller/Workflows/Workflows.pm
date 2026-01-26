@@ -57,16 +57,13 @@ sub execute($self) {
     # $self->render_later;
     $self->app->log->debug('Daje::Controller::Workflow::Workflow::execute');
 
-    my $temp = $self->req->body;
-    say "1";
     my ($companies_pkey, $users_pkey) = $self->jwt->companies_users_pkey(
         $self->req->headers->header('X-Token-Check')
     );
-say "2";
+
     $self->app->log->debug('Daje::Controller::Workflows::Workflows::execute '  . Dumper($self->req->body));
-say "3";
+
     my $data->{context} = decode_json ($self->req->body);
-    say "4";
     $data->{context}->{users_fkey} = $users_pkey;
     $data->{context}->{companies_fkey} = $companies_pkey;
     #
