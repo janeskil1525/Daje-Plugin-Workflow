@@ -56,16 +56,16 @@ sub execute($self) {
 
     # $self->render_later;
     $self->app->log->debug('Daje::Controller::Workflow::Workflow::execute');
+    try {
+        my ($companies_pkey, $users_pkey) = $self->jwt->companies_users_pkey(
+            $self->req->headers->header('X-Token-Check')
+        );
 
-    my ($companies_pkey, $users_pkey) = $self->jwt->companies_users_pkey(
-        $self->req->headers->header('X-Token-Check')
-    );
+        $self->app->log->debug('Daje::Controller::Workflows::Workflows::execute '  . Dumper($self->req->body));
 
-    $self->app->log->debug('Daje::Controller::Workflows::Workflows::execute '  . Dumper($self->req->body));
-
-    my $data->{context} = decode_json ($self->req->body);
-    $data->{context}->{users_fkey} = $users_pkey;
-    $data->{context}->{companies_fkey} = $companies_pkey;
+        my $data->{context} = decode_json ($self->req->body);
+        $data->{context}->{users_fkey} = $users_pkey;
+        $data->{context}->{companies_fkey} = $companies_pkey;
     #
     # push @{$data->{actions}}, "$self->stash('wf_action')";
     # $data->{workflow}->{workflow} = $self->stash('workflow');
@@ -74,7 +74,7 @@ sub execute($self) {
     # $data->{workflow}->{workflow_origin_key} = $self->stash('workflow_origin_key');
     #
     # say Dumper ($data);
-    try {
+
         if(exists $data->{context}->{payload}->{workflow_fkey}) {
             $self->workflow_engine->workflow_pkey($data->{context}->{payload}->{workflow_fkey});
         } else {

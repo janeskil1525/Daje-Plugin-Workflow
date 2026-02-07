@@ -88,7 +88,7 @@ sub register ($self, $app, $config) {
         $app->log->error($e);
     };
 
-    my $r = $app->routes;
+    my $r = $app->auth;
 
     $r->put('/' . $app->config('workflow')->{basepath} . '/api/workflow/execute')->to('Workflows#execute');
 
