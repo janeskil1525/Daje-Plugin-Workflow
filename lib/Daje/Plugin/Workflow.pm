@@ -90,7 +90,7 @@ sub register ($self, $app, $config) {
 
     my $r = $app->auth;
 
-    $r->put('/' . $app->config('workflow')->{basepath} . '/api/workflow/execute')->to('Workflows#execute');
+    $r->put('workflow/execute')->to('Workflows#execute');
 
     $app->helper(workflow_engine => sub {$workflow_engine});
 
