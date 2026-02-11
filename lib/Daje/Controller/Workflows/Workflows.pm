@@ -55,6 +55,7 @@ use Daje::Workflow::Database::Model;
 sub execute($self) {
 
     # $self->render_later;
+    say "Daje::Controller::Workflows::Workflows " . $self->req->headers->header('X-Token-Check');
     $self->app->log->debug('Daje::Controller::Workflow::Workflow::execute');
     try {
         my ($companies_pkey, $users_pkey) = $self->jwt->companies_users_pkey(
