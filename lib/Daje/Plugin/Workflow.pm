@@ -40,7 +40,7 @@ use v5.40;
 # janeskil1525 E<lt>janeskil1525@gmail.comE<gt>
 #
 
-our $VERSION = "0.30";
+our $VERSION = "0.35";
 
 use Data::Dumper;
 use Daje::Workflow::Database;
