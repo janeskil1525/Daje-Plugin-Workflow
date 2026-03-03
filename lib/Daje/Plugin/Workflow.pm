@@ -67,7 +67,8 @@ sub register ($self, $app, $config) {
     } catch ($e) {
         $app->log->error($e);
     };
-    if (exists $app->config('workflow')->{minion}) {
+
+    if (exists $app->config('workflow')->{minion} && $app->config('workflow')->{minion} == 1) {
         $app->minion->add_task(execute_workflow => \&_execute_workflow);
     }
 
@@ -77,12 +78,31 @@ sub register ($self, $app, $config) {
 
 sub _execute_workflow($job, $context) {
 
+    try {
+        if(exists $context->{context}->{payload}->{workflow_fkey}) {
+            $job->app->workflow_engine->workflow_pkey($context->{context}->{payload}->{workflow_fkey});
+        } else {
+            $job->app->workflow_engine->workflow_pkey($context->{context}->{workflow}->{workflow_fkey});
+        }
+        $job->app->workflow_engine->workflow_name($context->{context}->{workflow}->{workflow});
+        $job->app->workflow_engine->context($context);
+        $job->app->workflow_engine->process($context->{context}->{workflow}->{activity});
+        if($job->app->workflow_engine->error->has_error() == 0) {
+            my $message = $context->{context}->{workflow}->{workflow} . " and activity " .  $context->{context}->{workflow}->{activity} . " ended successfully";
+            $job->finish((message => $message ));
+        } else {
+            $job->fail((errors => ['Daje::Controller::Workflows::Workflows::execute ' . $job->app->workflow_engine->error->error()]));
+        }
+    } catch ($e) {
+        say $e;
+    }
 }
 
 sub setup_controller($self, $app) {
 
     push @{$app->routes->namespaces}, 'Daje::Controller::Workflows';
     my $r = $app->auth;
+    $r->put('workflow/execute_que')->to('Workflowsque#execute');
     $r->put('workflow/execute')->to('Workflows#execute');
 }
 
